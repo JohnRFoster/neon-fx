@@ -454,7 +454,7 @@ for (t in seq_len(n.drags)) {
 		data$max.cgdd <- max(data$cgdd) * 1.2
 		data$xind <- matrix(1, 4, horizon)
 
-		if (miceAndWeather | miceMNA) {
+		if (miceAndWeather || miceMNA) {
 			data$mice <- mna.scaled %>%
 				filter(Date %in% fx.sequence) %>%
 				pull(mna.scaled)
@@ -466,7 +466,7 @@ for (t in seq_len(n.drags)) {
 		}
 
 		if (year(fx.start.date) == 2021) {
-			if (model.job == "Static" | model.job == "Weather") {
+			if (model.job == "Static" || model.job == "Weather") {
 				horizon <- length(data$cgdd)
 				data$y <- y[, 1:horizon, ]
 			} else {
@@ -614,7 +614,7 @@ for (t in seq_len(n.drags)) {
 			for (ff in seq_along(nodes)) {
 				mcmc.check <- list()
 				col <- nodes[ff]
-				for (c in 1:length(out.nchains)) {
+				for (c in seq_along(out.nchains)) {
 					mcmc.check[[c]] <- coda::mcmc(out.nchains[[c]][, col])
 				}
 				gelman.keep[ff] <- try(coda::gelman.diag(
