@@ -63,6 +63,7 @@ run_transfer_nimble <- function(
 			data = data,
 			inits = init
 		)
+
 		cModel <- compileNimble(model)
 		mcmcConf <- configureMCMC(cModel, onlyRW = TRUE)
 		# if(process){
