@@ -637,7 +637,6 @@ for (t in seq_len(n.drags)) {
 		dat.draws <- dat.hindcast[draws, ]
 
 		fileDest <- file.path(dir.save, fx.start.date)
-		source("Functions/transferAnalysis.R")
 		message("Running analysis...")
 		transfer_analysis(
 			fx.df = dat.draws,
