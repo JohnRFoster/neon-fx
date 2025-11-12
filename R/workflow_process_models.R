@@ -20,18 +20,12 @@ library(nimble)
 library(parallel)
 # nimbleOptions('MCMCjointlySamplePredictiveBranches' = FALSE)
 
+source("R/functions.R")
+
 update <- TRUE
 
-dir.top <- "/projectnb/dietzelab/fosterj"
-dir.analysis <- file.path(
-	dir.top,
-	"FinalOut/A_Correct/Analysis/dormantStages/nimbleModels"
-)
+dir.data <- "data"
 dir.out <- "out"
-# dir.out <- file.path(dir.top, "FinalOut/Chapter3/outConstraintForest")
-if (update) {
-	dir.out <- paste0(dir.out, "Update")
-}
 
 models <- c("Static", "WithMNAMice", "Weather", "WithWeatherAndMiceGlobal")
 species <- c("Ixodes scapularis", "Amblyomma americanum")
@@ -96,11 +90,11 @@ horizon <- 365
 # =========================================== #
 #       tick data intake
 # =========================================== #
-source("Functions/neon_tick_data.R")
+
 neon.data <- neon_tick_data(species.job) %>% suppressMessages()
 
 neon.job <- neon.data %>%
-	filter(siteID == site.job, grepl("Forest", nlcd), time >= "2018-01-01") %>%
+	filter(siteID == site.job, time >= "2018-01-01") %>%
 	arrange(time)
 
 drag.dates <- neon.job$time %>% unique()
@@ -111,7 +105,7 @@ n.drags <- length(drag.dates)
 #       get initial conditions
 # =========================================== #
 
-df.latent <- read_csv(file.path(dir.analysis, "dormantNymphTimeSeries.csv"))
+df.latent <- read_csv(file.path(dir.data, "dormantNymphTimeSeries.csv"))
 month.get <- if_else(month(start.date) < 5, 4, month(start.date))
 data.latent <- df.latent %>%
 	mutate(model = gsub("DormantNymph", "", model)) %>%
@@ -146,8 +140,7 @@ IC <- tibble(
 #       mouse data intake
 # =========================================== #
 
-source("../neon-tick-smam/Functions/capture_matrix.R")
-neon.smam <- read_csv("../neon-tick-smam/Data/allSmallMammals.csv")
+neon.smam <- read_csv(file.path(dir.data, "allSmallMammals.csv"))
 ch.ls <- capture_matrix(site.job, neon.smam)
 ch <- ch.ls$ch
 alive <- ch %in% 1:3
@@ -155,7 +148,6 @@ ch[alive] <- 1
 ch[!alive] <- 0
 ncaps <- rowSums(ch)
 ch <- ch[ncaps > 0, ]
-source("Functions/known_states.R")
 ks <- known_states(ch)
 mna <- colSums(ks)
 mice.obs <- ymd(colnames(ch)) # unique sampling days: mice
@@ -175,7 +167,6 @@ for (i in seq_along(mice.seq)) {
 }
 
 # historical mna
-source("Functions/mna_jags.R")
 mna.hist <- mna_jags("Green Control", return.mean = TRUE)
 
 # center and scale
@@ -187,7 +178,7 @@ mna.scaled <- tibble(
 # =========================================== #
 #       daymet intake and correction
 # =========================================== #
-source("Functions/daymet_downscale.R")
+source("R/daymet_downscale.R")
 cgdd <- daymet_cumGDD(site.job) %>% suppressMessages()
 maxTemp <- daymet_temp(site.job, minimum = FALSE) %>%
 	select(Date, maxTempCorrect) %>%
@@ -199,7 +190,7 @@ precip <- daymet_precip(site.job) %>%
 	select(Date, precipitation) %>%
 	suppressMessages()
 
-source("Functions/scale_met_forecast.R")
+# the historical means and sds for scaling
 hist.means <- scale_met_forecast()
 
 join1 <- left_join(maxTemp, rh, by = "Date")
@@ -222,7 +213,7 @@ df.daymet <- join2 %>%
 # =========================================== #
 #       get informative priors
 # =========================================== #
-df.params <- read_csv(file.path(dir.analysis, "dormantNymphParams.csv"))
+df.params <- read_csv(file.path(dir.data, "dormantNymphParams.csv"))
 params.stats <- df.params %>%
 	filter(model == model.job) %>%
 	select(parameter, value) %>%
@@ -567,8 +558,8 @@ for (t in seq_len(n.drags)) {
 			}
 		}
 
-		source("Scripts/DA_neon.R")
-		source("Functions/run_transfer_nimble.R")
+		source("R/nimble_forecast.R")
+		source("R/run_transfer_nimble.R")
 		cl <- makeCluster(n.slots)
 		out.nchains <- run_transfer_nimble(
 			cl = cl,
