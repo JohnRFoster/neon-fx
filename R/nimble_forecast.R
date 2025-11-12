@@ -1,15 +1,20 @@
 library(nimble)
-source("Functions/nimble_functions.R")
 
-# registerDistributions(list(dwtmnorm = list(
-#   BUGSdist = "dwtmnorm(mean, prec, wt)",
-#   types = c(
-#     'value = double(1)',
-#     'mean = double(1)',
-#     'prec = double(2)',
-#     'wt = double(0)'
-#   )
-# )))
+
+if_else_nimble <- nimbleFunction(
+	run = function(
+		condition = integer(0),
+		valueIf = double(0),
+		valueElse = double(0)
+	) {
+		returnType(double(0))
+		if (condition == TRUE) {
+			return(valueIf)
+		} else {
+			return(valueElse)
+		}
+	}
+)
 
 model.code <- nimbleCode({
 	### priors
