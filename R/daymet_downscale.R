@@ -10,7 +10,7 @@ library(tidyverse)
 #' @param org either "tick" or "smam"
 daymet_cumGDD <- function(site) {
 	df.all <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_maxTemperature.csv"
+		"data/daymetSite_maxTemperature.csv"
 	)
 	df <- df.all %>%
 		filter(siteID == site) %>%
@@ -28,13 +28,13 @@ daymet_cumGDD <- function(site) {
 daymet_temp <- function(site, minimum) {
 	if (minimum) {
 		df <- read_csv(
-			"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_minTemperature.csv"
+			"data/daymetSite_minTemperature.csv"
 		)
 		neon.col <- "tempTripleMinimum"
 		daymet.col <- "minTemperature"
 	} else {
 		df <- read_csv(
-			"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_maxTemperature.csv"
+			"data/daymetSite_maxTemperature.csv"
 		)
 		neon.col <- "tempTripleMaximum"
 		daymet.col <- "maxTemperature"
@@ -46,7 +46,7 @@ daymet_temp <- function(site, minimum) {
 		select(-tile)
 
 	neon.temp <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/airTempDaily.csv"
+		"data/airTempDaily.csv"
 	)
 	neon.sub <- neon.temp %>%
 		filter(siteID == site) %>%
@@ -103,14 +103,14 @@ daymet_temp <- function(site, minimum) {
 
 daymet_rh <- function(site) {
 	df <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_vaporPressure.csv"
+		"data/daymetSite_vaporPressure.csv"
 	)
 	df.vpd <- df %>%
 		filter(siteID == site) %>%
 		select(-tile)
 
 	df <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_maxTemperature.csv"
+		"data/daymetSite_maxTemperature.csv"
 	)
 	df.temp <- df %>%
 		filter(siteID == site) %>%
@@ -134,7 +134,7 @@ daymet_rh <- function(site) {
 		mutate(rh = plantecophys::VPDtoRH(vaporPressure / 1000, maxTemperature))
 
 	neon.temp <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/RelativeHumidityDaily.csv"
+		"data/RelativeHumidityDaily.csv"
 	)
 	neon.sub <- neon.temp %>%
 		filter(siteID == site) %>%
@@ -205,7 +205,7 @@ daymet_rh <- function(site) {
 
 daymet_precip <- function(site) {
 	neon.precip <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/precipDaily.csv"
+		"data/precipDaily.csv"
 	)
 	neon.sub <- neon.precip %>%
 		filter(siteID == site) %>%
@@ -216,7 +216,7 @@ daymet_precip <- function(site) {
 		mean()
 
 	df <- read_csv(
-		"/projectnb/dietzelab/fosterj/neon-tick-smam/Data/daymetSite_precipitation.csv"
+		"data/daymetSite_precipitation.csv"
 	)
 
 	df.p <- df %>%
